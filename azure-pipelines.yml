@@ -1,0 +1,35 @@
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  tag: '$(Build.BuildId)'
+
+pool:
+  vmImage: 'vs2017-win2016'
+
+stages:
+- stage: Build
+  displayName: Build Portfolio/blog
+  jobs:
+    - job: Build
+      displayName: Build
+      steps:
+        - checkout: self
+          displayName: 'Checkout repository including submodules'
+          submodules: true
+        - task: HugoTask@1
+          displayName: 'Generate Hugo site'
+          inputs:
+            destination: '$(Build.ArtifactStagingDirectory)'
+            baseURL: 'https://okothouko.github.io/'
+        - task: PublishPipelineArtifact@0
+          displayName: 'Publish Hugo site as an artifact'
+          inputs:
+            artifactName: 'hugo-site'
+            targetPath: '$(Build.ArtifactStagingDirectory)'
+
+
+
